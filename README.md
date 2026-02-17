@@ -1,110 +1,143 @@
-# 📊 Survey-as-a-Service Core System (SurveyCore)
+# 📊 Survey-as-a-Service Core System (SurveyCore) - Manual Teknis & Arsitektur Terperinci
 
-![SurveyCore Technical Banner](https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2070)
+![SurveyCore Technical Header](https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2070)
 
-**SurveyCore** adalah platform infrastruktur survei kelas komputasi awan (SaaS) yang dirancang untuk kebutuhan integrasi tingkat tinggi, skalabilitas data masif, dan analisis cerdas berbasis AI. Dokumen ini merincikan aspek teknis, logika bisnis, dan struktur sistem secara mendalam.
-
----
-
-## 🏛️ Arsitektur Sistem (Technical Design)
-
-### 1. Pola Arsitektur
-Sistem ini mengadopsi pola **Service-Repository** dan **DTO (Data Transfer Objects)** untuk memastikan kode yang bersih (*Clean Code*), testable, dan mudah dirawat. Logika validasi dipindahkan ke FormRequests atau DTO untuk memastikan integritas data dari API hingga Database.
-
-### 2. Multi-Tenant Isolation
-Platform ini dibangun dengan arsitektur **Shared Database, Shared Schema**. 
-- **Logika**: Setiap baris data dalam tabel operasional (Survei, Respons, API, Log) memiliki kunci `tenant_id`.
-- **Filtering**: Menggunakan *Global Scoping* pada Model Laravel untuk memastikan pengguna dari Instansi A tidak akan pernah bisa melihat data Instansi B.
-- **Isolasi UI**: Admin Panel menyesuaikan konten halaman berdasarkan asosiasi tenant pengguna yang sedang login.
-
-### 3. API-First Design
-SurveyCore bukan sekadar aplikasi web, melainkan sebuah **API Provider**. 
-- **OAuth2 Implementation**: Menggunakan **Laravel Passport** untuk autentikasi sistem-ke-sistem yang aman.
-- **Hiding Internal Logic**: Objek internal ditransformasikan melalui *API Resources* untuk mengamankan kebocoran data sensitif.
+**SurveyCore** adalah platform infrastruktur survei terpusat tingkat enterprise yang dibangun untuk menangani beban operasional pemerintahan (Government-as-a-Platform). Sistem ini memberikan isolasi data instansi yang mutlak, pengolahan bahasa alami (NLP) melalui AI, serta ekosistem integrasi "Headless" untuk aplikasi pihak ketiga.
 
 ---
 
-## 💻 Tech Stack & Library Utama
+## 🏗️ 1. Arsitektur Komputasi & Keamanan (Architecture Deep Dive)
 
-| Komponen | Teknologi | Keterangan |
+### A. Lapisan Perangkat Lunak (Software Layers)
+1.  **Core Framework**: Laravel 12.0 (PHP 8.3+) dengan optimasi cache/Opcache.
+2.  **Logic Layer**: Mengimplementasikan **Service-Repository Pattern**.
+    - `Services/`: Menangani logika bisnis (misal: perhitungan skor IKM, validasi kuota).
+    - `Repositories/`: Mengisolasi query ke database agar data akses layer tetap modular.
+3.  **Data Isolation (True Multi-Tenancy)**:
+    - Menggunakan **Eloquent Global Scopes**. Setiap model (Survey, Response, dsb.) secara otomatis memfilter data berdasarkan `tenant_id` dari user yang terautentikasi.
+    - Menjamin tidak ada kebocoran data (*Data Leakage*) antar-instansi/organisasi.
+4.  **UI Engine**: Filament v3 (TALL Stack). Memberikan antarmuka admin yang sepenuhnya reaktif melalui Livewire dan Alpine.js.
+
+### B. Kerangka Keamanan (Security Framework)
+- **HMAC Signature Verification**: API tingkat tinggi dilindungi oleh tanda tangan digital (HMAC-SHA256) untuk memastikan integritas pesan.
+- **Nonce & Anti-Replay**: Menggunakan Redis untuk memvalidasi `nonce` setiap request API guna mencegah serangan *Replay Attack*.
+- **Rate Limiting**: Throttling per-Client ID untuk mencegah banjir trafik (DDoS) pada endpoint pengiriman respons.
+- **Content Security Policy (CSP)**: Implementasi header keamanan ketat untuk mencegah XSS dan Frame Injection.
+
+---
+
+## 🗄️ 2. Katalog Domain & Database (Domain Knowledge)
+
+Skema database dirancang secara normalisasi tinggi untuk konsistensi data:
+
+### i. Domain Identitas & Akses
+- `tenants`: Basis data workspace instansi (Dinas/Unit).
+- `users`, `roles`, `permissions`: Implementasi RBAC dengan tingkat presisi kolom.
+
+### ii. Domain Survey Engine (Dynamic Structure)
+- `surveys`: Induk survei dengan kontrol status (Draft, Active, Closed).
+- `survey_sections`: Memungkinkan survei multi-halaman.
+- `questions`: Mendukung tipe data: `standard`, `rating`, `multiple_choice`, `matrix`.
+- `question_logic`: Menyimpan aturan lompatan (Branching) berbasis jawaban sebelumnya.
+
+### iii. Domain Respons & Analitik
+- `survey_responses`: Metadata teknis (User Agent, IP, Duration).
+- `response_answers`: Penyimpanan jawaban atomik (per pertanyaan).
+- `survey_statistics`: Tabel agregasi untuk pembacaan dashboard cepat (Read-Optimized).
+
+### iv. Domain AI & Intelligence
+- `ai_sentiment_analysis`: Output NLP untuk mendeteksi emosi warga.
+- `ai_insights`: Generasi rekomendasi naratif berbasis data agregat.
+- `ai_chat_conversations`: RIwayat dialog AI-Human untuk analisis interaktif.
+
+---
+
+## � 3. Bedah Operasional Modul Admin (19 Modul)
+
+| Kelompok | Nama Modul | Logika Bisnis & Detail Views |
 | :--- | :--- | :--- |
-| **Framework Utama** | Laravel 12 | Memanfaatkan fitur terbaru PHP 8.3+ (Readonly properties, Typed classes). |
-| **Admin Interface** | Filament v3 | Framework TALL (Tailwind, Alpine, Laravel, Livewire) untuk UI yang reaktif. |
-| **Autentikasi API** | Laravel Passport | Implementasi OAuth2 Client/Secret untuk sistem pihak ketiga. |
-| **AI Processing** | OpenAI/Gemini Integration | Digunakan untuk Sentiment Analysis dan NLP Insight Extraction. |
-| **Data Visualization** | Chart.js & ApexCharts | Untuk Dashboard dan Statistik Operasional. |
-| **Keamanan** | Laravel Sanctum & CSP | Proteksi berlapis terhadap XSS, CSRF, dan injeksi data. |
-| **Versi DB** | MySQL 8.0 / PostgreSQL | Mendukung optimasi JSON Column untuk struktur survei dinamis. |
+| **1-UTAMA** | **Konfigurasi Instansi** | Manajemen siklus hidup Tenant. Mendukung pengaturan batas kuota respons per-instansi. |
+| | **Manajemen Pengguna** | Dashboard kontrol akun. Admin Pusat dapat melakukan "Impersonate" untuk membantu konfigurasi instansi. |
+| **2-DESAIN** | **Template Survei** | Library master kuesioner. Perubahan pada template master tidak akan merusak data survei yang sudah berjalan (Versioning Support). |
+| | **Tema Visual** | Editor CSS dinamis. Menyediakan preview warna primer/sekunder langsung pada panel. |
+| **3-OPERASIONAL**| **Daftar Survei** | View manajemen survei dengan sistem Wizard (Step-by-step). Dilengkapi tombol **"Integrasi API"** untuk melihat panduan teknis per-survei. |
+| | **Hasil Jawaban** | Viewer tabel reaktif dengan filter canggih. Admin bisa melihat detil jawaban warga dalam hitungan detik. |
+| **4-ANALISIS AI** | **Statistik Data** | Visualisasi tren kepuasan (NPS/IKM). Menampilkan titik *Drop-off* (di mana warga sering berhenti mengisi). |
+| | **Insight AI** | Pipeline AI yang membaca anomali dan tren, memberikan ringkasan seperti: *"Tren kepuasan menurun di unit A akibat waktu tunggu."* |
+| | **Analisis Sentimen** | Klasifikasi otomatis teks esai menjadi data numerik untuk kemudahan filtering masal. |
+| | **Tanya AI (Chat)** | Antarmuka Natural Language Query. Memungkinkan pengambilan data tanpa butuh skill IT. |
+| **5-KONEKTIVITAS**| **Aplikasi Luar** | Manajemen aplikasi Client via OAuth2. Memberikan kontrol penuh atas siapa yang boleh menarik data. |
+| | **Kunci Akses** | Rotasi API Key (Secret). Mekanisme keamanan untuk akses server-ke-server. |
+| | **Webhook** | Konfigurasi URL Callback. Payload dikirim dalam format JSON terstandarisasi. |
+| **6-KEAMANAN** | **Log Audit** | Mencatat aktivitas CRUD di level model. Memberikan transparansi mutlak atas tindakan administrator. |
+| | **Persetujuan** | Logging legalitas pengumpulan data (Consent). Penting untuk kepatuhan hukum di level internasional. |
 
 ---
 
-## 🗄️ Struktur Database & Logika Data
+## 🔌 4. Manual Integrasi API untuk Developer (Exhaustive Guide)
 
-### Skema Database Utama (40+ Tabel)
-1.  **Core Tables**: `tenants`, `users`, `roles`, `permissions` (Manajemen hak akses & multi-tenant).
-2.  **Survey Engine**: `surveys`, `survey_sections`, `questions`, `question_options`, `question_logic` (Penyimpanan dinamis struktur kuesioner).
-3.  **Response Engine**: `survey_responses`, `response_answers`, `response_analytics` (Penyimpanan meta-data input responden).
-4.  **AI Module**: `ai_insights`, `ai_sentiment_analysis`, `ai_chat_conversations`, `ai_anomaly_detection`.
-5.  **Connectivity Module**: `api_clients`, `api_keys`, `webhooks`, `webhook_logs`.
-6.  **Compliance & Log**: `audit_logs`, `api_usage_logs`, `consent_records`, `data_retention_policies`.
+Sistem ini didesain agar integrasi dapat dilakukan dalam waktu kurang dari 1 jam.
 
----
+### Step 1: Autentikasi OAuth2
+Dapatkan Token Akses menggunakan Client Credentials:
+```bash
+curl -X POST /oauth/token \
+  -F "grant_type=client_credentials" \
+  -F "client_id=ID" \
+  -F "client_secret=SECRET"
+```
 
-## 🚀 Fitur & Modul Detail (Functional Breakdown)
+### Step 2: Mengambil Skema Survei (GET)
+Endpoint: `GET /api/v1/surveys/{uuid}`
+- **Logika**: Mengembalikan JSON yang berisi seluruh pertanyaan, opsi, dan tema visual terkait. Developer cukup melakukan *looping* pada JSON ini untuk merender tampilan di aplikasi mobile/web mereka.
 
-### 1. Kelompok UTAMA (Identity & Access)
-- **Konfigurasi Instansi (`TenantResource`)**: Mengelola "Ruang Kerja" (Workspace) setiap organisasi.
-- **Manajemen Pengguna (`UserResource`)**: Pengaturan Role Admin (Super Admin vs Tenant Admin).
-
-### 2. Kelompok DESAIN & TEMPLATE
-- **Template Survei (`SurveyTemplateResource`)**: Definisi skema JSON standar untuk pertanyaan yang sering digunakan.
-- **Tema Visual (`SurveyThemeResource`)**: Manajemen CSS dinamis melalui panel web untuk menyesuaikan font dan warna.
-
-### 3. Kelompok OPERASIONAL (Survey Execution)
-- **Daftar Survei (`SurveyResource`)**: Menggunakan **Wizard Interface** untuk alur pembuatan survei. Mendukung penjadwalan otomatis (`starts_at` & `ends_at`).
-- **Hasil Jawaban (`SurveyResponseResource`)**: Menampilkan data mentah per responden beserta meta-data teknis (IP, Browser, Device).
-
-### 4. Kelompok ANALISIS & AI (Intelligence Layer)
-- **Statistik Data**: Aggregasi data otomatis menggunakan query SQL kompleks untuk menghitung *Completion Rate* dan *Drop-off Point*.
-- **Insight AI**: Pipeline cerdas yang mengambil subset data terbaru dan mengirimkannya ke LLM (Large Language Model) guna mengekstrak poin penting tanpa intervensi manusia.
-- **Analisis Sentimen**: Evaluasi real-time pada jawaban kualitatif (teks) untuk mengukur kepuasan emosional warga.
-- **Tanya AI (Chat)**: Fitur RAG (Retrieval-Augmented Generation) sederhana di mana user bisa bertanya langsung pada data surveinya.
-
-### 5. Kelompok KONEKTIVITAS (API & Automation)
-- **Layanan Integrasi**: Manajemen kredensial pihak ketiga.
-- **Aplikasi Luar (Client)**: Implementasi OAuth2 Client Manager.
-- **Kunci Akses (Keys)**: Penyediaan API Keys yang dapat dicabut/diaktifkan kapan saja.
-- **Webhook**: Sistem pengiriman payload JSON asinkron menggunakan Laravel Queue/Job.
-
-### 6. Kelompok KEAMANAN & LOG (Governance)
-- **Log Audit**: Tracker perubahan model Eloquent.
-- **Consent & Retention**: Implementasi perlindungan data pribadi dengan menghapus data PII sesuai kebijakan waktu yang ditentukan.
+### Step 3: Pengiriman Jawaban (POST)
+Endpoint: `POST /api/v1/surveys/{uuid}/submit`
+- **Header Keamanan (Wajib)**:
+  - `X-API-Key`: API Key Anda.
+  - `X-Timestamp`: Unix timestamp saat ini.
+  - `X-Signature`: HMAC(sha256, payload, secret).
+- **Body JSON**:
+```json
+{
+  "respondent_id": "unique-id-warga",
+  "device_info": { "os": "Android", "model": "Pixel 8" },
+  "answers": [
+    { "question_id": 50, "value": "Sangat Puas" },
+    { "question_id": 51, "value": "Petugas ramah dan sopan" }
+  ]
+}
+```
 
 ---
 
-## 🛠️ Alur Kerja Teknis (Workflows)
+## 🧠 5. Pipeline Analitik & AI (The Intelligence Core)
 
-1.  **Survey Creation**: Admin menyusun Section -> Question -> Logic. Data disimpan dalam struktur relasional yang dioptimasi untuk pembacaan cepat.
-2.  **Submission**: Responden mengisi data -> Validasi Server Side -> Penyimpanan asinkron untuk meta-data -> AI Sentiment Trigger (Queue).
-3.  **Integration**: Data berubah -> Webhook terpicu -> Pengiriman data ke aplikasi eksternal Dinas (misal: Sapa Warga atau SiPinter).
-
----
-
-## � Instalasi & Pengembangan
-
-### Langkah Setup:
-1.  **Clone & Composer Install**.
-2.  **Environment Config**: Sesuaikan kredensial DB dan Passport keys.
-3.  **Migration & Seeding**:
-    ```bash
-    php artisan migrate:fresh --seed
-    ```
-4.  **Passport Install**:
-    ```bash
-    php artisan passport:install
-    ```
+Sistem AI tidak berjalan di thread utama (Main Thread) agar akses user tidak lambat:
+1.  **Entry**: Jawaban masuk via API/Web.
+2.  **Queue**: Laravel Jobs memasukkan data respons ke dalam antrean.
+3.  **Process**: Worker mengambil data teks, mengirimkannya ke mesin NLP AI.
+4.  **Enrich**: Tabel `ai_sentiment_analysis` diisi dengan skor emosi.
+5.  **Audit**: `SurveyResponseObserver` secara otomatis mencatatkan event pemicu ke log integrasi.
 
 ---
-**Dokumentasi ini mencakup keseluruhan sistem SurveyCore. Untuk panduan teknis spesifik API, silakan merujuk ke file `API_DOCUMENTATION.md`.**
-# SurveiCoreSystem
-# SurveiCoreSystem
+
+## 🛠️ 6. Panduan Maintenance & Pengembangan
+
+### Perintah Penting (Ops):
+- **Reset & Seed (Demo Power)**:
+  `php artisan migrate:fresh --seed` (Menciptakan 10 Instansi & ratusan data demo).
+- **Update Filament Cache**:
+  `php artisan filament:upgrade`.
+- **Monitor Queue**:
+  `php artisan queue:work` (Pastikan worker berjalan untuk pemrosesan AI & Webhook).
+
+### Pengembangan Mendatang (Roadmap):
+- Modul GIS (Geographic Information System) untuk memetakan kepuasan per-wilayah.
+- Integrasi biometrik melalui API khusus verifikasi warga.
+
+---
+**SurveyCore terus berkembang sebagai standar infrastruktur survei yang andal, aman, dan cerdas.**
+
+---
+**Developed with ❤️ by the SurveyCore Engineering Team.**
