@@ -33,9 +33,12 @@ class PublicStatsController extends Controller
                 'response_rate' => $this->calculateResponseRate(),
                 'monthly_responses' => $this->getMonthlyResponses(),
                 'popular_surveys' => $this->getPopularSurveys(),
-                'active_tenants' => Tenant::where('status', 'active')
-                ->take(6)
-                ->get(['name', 'slug'])
+                'active_tenants' => Survey::where('status', 'active')
+                ->whereNotNull('source_app_name')
+                ->distinct()
+                ->take(10)
+                ->pluck('source_app_name')
+                ->map(fn($name) => ['name' => $name])
                 ->toArray(),
                 ];
             });

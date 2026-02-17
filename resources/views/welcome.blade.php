@@ -59,7 +59,7 @@
     <!-- Tenant Ecosystem Section -->
     <section class="ecosystem-section fade-in-up">
         <div class="container">
-            <p class="ecosystem-label">Terintegrasi dengan Ekosistem Instansi</p>
+            <p class="ecosystem-label">Aplikasi yang Terintegrasi</p>
             <div class="tenant-slider" id="tenantSlider">
                 <!-- Data loaded via JS -->
                 <div class="loading-spinner"></div>
