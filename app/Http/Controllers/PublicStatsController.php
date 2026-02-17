@@ -19,32 +19,24 @@ class PublicStatsController extends Controller
     {
         $stats = Cache::remember('public_stats', 300, function () {
             return [
-            'total_surveys' => Survey::where('type', 'public')
-            ->where('status', 'active')
-            ->count(),
-
-            'total_responses' => SurveyResponse::whereHas('survey', function ($query) {
-                    $query->where('type', 'public');
-                }
-                )->count(),
-
-                'total_organizations' => Tenant::where('status', 'active')->count(),
-
-                'active_surveys' => Survey::where('type', 'public')
-                ->where('status', 'active')
-                ->whereDate('starts_at', '<=', now())
-                ->where(function ($query) {
+            'total_surveys' => Survey::where('status', 'active')->count(),
+            'total_responses' => SurveyResponse::count(),
+            'total_organizations' => Tenant::where('status', 'active')->count(),
+            'active_surveys' => Survey::where('status', 'active')
+            ->whereDate('starts_at', '<=', now())
+            ->where(function ($query) {
                     $query->whereNull('ends_at')
                         ->orWhereDate('ends_at', '>=', now());
                 }
                 )
                 ->count(),
-
                 'response_rate' => $this->calculateResponseRate(),
-
                 'monthly_responses' => $this->getMonthlyResponses(),
-
                 'popular_surveys' => $this->getPopularSurveys(),
+                'active_tenants' => Tenant::where('status', 'active')
+                ->take(6)
+                ->get(['name', 'slug'])
+                ->toArray(),
                 ];
             });
 

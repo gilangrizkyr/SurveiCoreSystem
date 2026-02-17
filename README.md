@@ -1,143 +1,129 @@
-# 📊 Survey-as-a-Service Core System (SurveyCore) - Manual Teknis & Arsitektur Terperinci
+# 📊 Survey-as-a-Service Core System (SurveyCore)
+### *The Enterprise-Grade Infrastructure for Intelligent Data Collection & Analysis*
 
-![SurveyCore Technical Header](https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2070)
-
-**SurveyCore** adalah platform infrastruktur survei terpusat tingkat enterprise yang dibangun untuk menangani beban operasional pemerintahan (Government-as-a-Platform). Sistem ini memberikan isolasi data instansi yang mutlak, pengolahan bahasa alami (NLP) melalui AI, serta ekosistem integrasi "Headless" untuk aplikasi pihak ketiga.
-
----
-
-## 🏗️ 1. Arsitektur Komputasi & Keamanan (Architecture Deep Dive)
-
-### A. Lapisan Perangkat Lunak (Software Layers)
-1.  **Core Framework**: Laravel 12.0 (PHP 8.3+) dengan optimasi cache/Opcache.
-2.  **Logic Layer**: Mengimplementasikan **Service-Repository Pattern**.
-    - `Services/`: Menangani logika bisnis (misal: perhitungan skor IKM, validasi kuota).
-    - `Repositories/`: Mengisolasi query ke database agar data akses layer tetap modular.
-3.  **Data Isolation (True Multi-Tenancy)**:
-    - Menggunakan **Eloquent Global Scopes**. Setiap model (Survey, Response, dsb.) secara otomatis memfilter data berdasarkan `tenant_id` dari user yang terautentikasi.
-    - Menjamin tidak ada kebocoran data (*Data Leakage*) antar-instansi/organisasi.
-4.  **UI Engine**: Filament v3 (TALL Stack). Memberikan antarmuka admin yang sepenuhnya reaktif melalui Livewire dan Alpine.js.
-
-### B. Kerangka Keamanan (Security Framework)
-- **HMAC Signature Verification**: API tingkat tinggi dilindungi oleh tanda tangan digital (HMAC-SHA256) untuk memastikan integritas pesan.
-- **Nonce & Anti-Replay**: Menggunakan Redis untuk memvalidasi `nonce` setiap request API guna mencegah serangan *Replay Attack*.
-- **Rate Limiting**: Throttling per-Client ID untuk mencegah banjir trafik (DDoS) pada endpoint pengiriman respons.
-- **Content Security Policy (CSP)**: Implementasi header keamanan ketat untuk mencegah XSS dan Frame Injection.
+![SurveyCore Enterprise Header](https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2070)
 
 ---
 
-## 🗄️ 2. Katalog Domain & Database (Domain Knowledge)
-
-Skema database dirancang secara normalisasi tinggi untuk konsistensi data:
-
-### i. Domain Identitas & Akses
-- `tenants`: Basis data workspace instansi (Dinas/Unit).
-- `users`, `roles`, `permissions`: Implementasi RBAC dengan tingkat presisi kolom.
-
-### ii. Domain Survey Engine (Dynamic Structure)
-- `surveys`: Induk survei dengan kontrol status (Draft, Active, Closed).
-- `survey_sections`: Memungkinkan survei multi-halaman.
-- `questions`: Mendukung tipe data: `standard`, `rating`, `multiple_choice`, `matrix`.
-- `question_logic`: Menyimpan aturan lompatan (Branching) berbasis jawaban sebelumnya.
-
-### iii. Domain Respons & Analitik
-- `survey_responses`: Metadata teknis (User Agent, IP, Duration).
-- `response_answers`: Penyimpanan jawaban atomik (per pertanyaan).
-- `survey_statistics`: Tabel agregasi untuk pembacaan dashboard cepat (Read-Optimized).
-
-### iv. Domain AI & Intelligence
-- `ai_sentiment_analysis`: Output NLP untuk mendeteksi emosi warga.
-- `ai_insights`: Generasi rekomendasi naratif berbasis data agregat.
-- `ai_chat_conversations`: RIwayat dialog AI-Human untuk analisis interaktif.
+## 🏛️ 1. Visi & Filosofi Sistem
+**SurveyCore** dikembangkan bukan sekadar sebagai aplikasi survei, melainkan sebagai **Infrastruktur Dasar (Core Infrastructure)** untuk tata kelola data di tingkat korporasi atau pemerintahan (Government-as-a-Platform). Sistem ini memungkinkan sentralisasi data survei dari berbagai titik entri (Web, Mobile, WhatsApp) ke dalam satu *Intelligence Hub* yang diamankan dengan standar protokol keamanan perbankan.
 
 ---
 
-## � 3. Bedah Operasional Modul Admin (19 Modul)
+## 🏗️ 2. Arsitektur Teknis & Pola Desain (Software Engineering)
 
-| Kelompok | Nama Modul | Logika Bisnis & Detail Views |
-| :--- | :--- | :--- |
-| **1-UTAMA** | **Konfigurasi Instansi** | Manajemen siklus hidup Tenant. Mendukung pengaturan batas kuota respons per-instansi. |
-| | **Manajemen Pengguna** | Dashboard kontrol akun. Admin Pusat dapat melakukan "Impersonate" untuk membantu konfigurasi instansi. |
-| **2-DESAIN** | **Template Survei** | Library master kuesioner. Perubahan pada template master tidak akan merusak data survei yang sudah berjalan (Versioning Support). |
-| | **Tema Visual** | Editor CSS dinamis. Menyediakan preview warna primer/sekunder langsung pada panel. |
-| **3-OPERASIONAL**| **Daftar Survei** | View manajemen survei dengan sistem Wizard (Step-by-step). Dilengkapi tombol **"Integrasi API"** untuk melihat panduan teknis per-survei. |
-| | **Hasil Jawaban** | Viewer tabel reaktif dengan filter canggih. Admin bisa melihat detil jawaban warga dalam hitungan detik. |
-| **4-ANALISIS AI** | **Statistik Data** | Visualisasi tren kepuasan (NPS/IKM). Menampilkan titik *Drop-off* (di mana warga sering berhenti mengisi). |
-| | **Insight AI** | Pipeline AI yang membaca anomali dan tren, memberikan ringkasan seperti: *"Tren kepuasan menurun di unit A akibat waktu tunggu."* |
-| | **Analisis Sentimen** | Klasifikasi otomatis teks esai menjadi data numerik untuk kemudahan filtering masal. |
-| | **Tanya AI (Chat)** | Antarmuka Natural Language Query. Memungkinkan pengambilan data tanpa butuh skill IT. |
-| **5-KONEKTIVITAS**| **Aplikasi Luar** | Manajemen aplikasi Client via OAuth2. Memberikan kontrol penuh atas siapa yang boleh menarik data. |
-| | **Kunci Akses** | Rotasi API Key (Secret). Mekanisme keamanan untuk akses server-ke-server. |
-| | **Webhook** | Konfigurasi URL Callback. Payload dikirim dalam format JSON terstandarisasi. |
-| **6-KEAMANAN** | **Log Audit** | Mencatat aktivitas CRUD di level model. Memberikan transparansi mutlak atas tindakan administrator. |
-| | **Persetujuan** | Logging legalitas pengumpulan data (Consent). Penting untuk kepatuhan hukum di level internasional. |
+SurveyCore dibangun di atas prinsip **Clean Architecture** untuk memastikan skalabilitas jangka panjang dan kemudahan integrasi.
+
+### A. Pola Desain (Logic Flow)
+- **Service-Repository Pattern**: Memisahkan logika bisnis kompleks dari akses database. Hal ini menjamin kode tetap modular dan mudah dilakukan *unit testing*.
+- **DTO (Data Transfer Objects)**: Memastikan aliran data antar lapisan sistem tetap terstruktur dan tervalidasi dengan ketat.
+- **Global Multi-Tenant Scoping**: Setiap query database secara otomatis diproteksi oleh *Global Scopes* yang menyaring data berdasarkan identitas Instansi (`tenant_id`), memastikan **Isolasi Data Mutlak**.
+
+### B. Arsitektur API (Headless Implementation)
+Sistem ini bersifat **Headless Ready**, memungkinkan pengembang untuk menggunakan SurveyCore murni sebagai mesin API untuk:
+- Merender kuesioner secara dinamis di aplikasi pihak ketiga.
+- Mengumpulkan respons melalui jalur terenkripsi.
+- Mengambil statistik agregat secara real-time.
 
 ---
 
-## 🔌 4. Manual Integrasi API untuk Developer (Exhaustive Guide)
+## 🛡️ 3. Kerangka Keamanan Tingkat Tinggi (Security Framework)
 
-Sistem ini didesain agar integrasi dapat dilakukan dalam waktu kurang dari 1 jam.
+SurveyCore menerapkan pertahanan berlapis (**Defense-in-Depth**) untuk melindungi integritas data layanan publik:
 
-### Step 1: Autentikasi OAuth2
-Dapatkan Token Akses menggunakan Client Credentials:
-```bash
-curl -X POST /oauth/token \
-  -F "grant_type=client_credentials" \
-  -F "client_id=ID" \
-  -F "client_secret=SECRET"
-```
-
-### Step 2: Mengambil Skema Survei (GET)
-Endpoint: `GET /api/v1/surveys/{uuid}`
-- **Logika**: Mengembalikan JSON yang berisi seluruh pertanyaan, opsi, dan tema visual terkait. Developer cukup melakukan *looping* pada JSON ini untuk merender tampilan di aplikasi mobile/web mereka.
-
-### Step 3: Pengiriman Jawaban (POST)
-Endpoint: `POST /api/v1/surveys/{uuid}/submit`
-- **Header Keamanan (Wajib)**:
-  - `X-API-Key`: API Key Anda.
-  - `X-Timestamp`: Unix timestamp saat ini.
-  - `X-Signature`: HMAC(sha256, payload, secret).
-- **Body JSON**:
-```json
-{
-  "respondent_id": "unique-id-warga",
-  "device_info": { "os": "Android", "model": "Pixel 8" },
-  "answers": [
-    { "question_id": 50, "value": "Sangat Puas" },
-    { "question_id": 51, "value": "Petugas ramah dan sopan" }
-  ]
-}
-```
+- **HMAC-SHA256 Signature**: Validasi integritas data pada setiap transaksi API. Menjamin data tidak dimanipulasi selama proses transmisi.
+- **Redis Anti-Replay Mechanism**: Menggunakan *Memcached/Redis Nonce* untuk memblokir serangan pengulangan data (*Replay Attacks*).
+- **Audit Traceability**: Setiap perubahan data sensitif dicatat oleh **Model Observers** ke dalam tabel log audit yang mencakup: *Who, When, Where (IP), and Change Delta*.
+- **Security Headers & CSP**: Implementasi kebijakan keamanan browser yang ketat (XSS Protection, HSTS, Content-Security-Policy).
+- **Compliance Ready (PDP/GDPR)**: Fitur built-in untuk manajemen persetujuan responden (*Consent Management*) dan kebijakan retensi data otomatis.
 
 ---
 
-## 🧠 5. Pipeline Analitik & AI (The Intelligence Core)
+## 🧠 4. Artificial Intelligence & Analytics Suite (Gemini AI Integration)
 
-Sistem AI tidak berjalan di thread utama (Main Thread) agar akses user tidak lambat:
-1.  **Entry**: Jawaban masuk via API/Web.
-2.  **Queue**: Laravel Jobs memasukkan data respons ke dalam antrean.
-3.  **Process**: Worker mengambil data teks, mengirimkannya ke mesin NLP AI.
-4.  **Enrich**: Tabel `ai_sentiment_analysis` diisi dengan skor emosi.
-5.  **Audit**: `SurveyResponseObserver` secara otomatis mencatatkan event pemicu ke log integrasi.
+Sistem tidak hanya mengumpulkan data, tetapi juga "memahami" data tersebut secara otomatis menggunakan **Google Gemini AI SDK**.
+
+### A. Pipeline Pemrosesan Asinkron
+Setiap respons yang masuk akan diproses secara non-blocking melalui **Laravel Queue (Redis)** untuk menjaga latensi:
+1.  **Event Trigger**: `SurveyResponseObserver` mendeteksi data baru.
+2.  **Job Queuing**: Dispatch `AnalyzeSentimentJob` ke background worker.
+3.  **Engine Inference**: Mengirimkan konten teks ke model **Gemini 1.5 Flash/Pro** melalui REST API.
+4.  **Data Extraction**: Menyimpan hasil analisis (sentiment score 0.0-1.0, emotion tags, confidence level) ke tabel `ai_sentiment_analysis`.
+
+### B. Strategi Prompt Engineering
+Kami menggunakan *Structured System Prompts* untuk memastikan output AI konsisten:
+- **Role**: "Expert Data Analyst for Government Public Services".
+- **Instruction**: "Analyze the following feedback for sentiment polarities and specific citizen complaints. Return strictly valid JSON."
+- **Output Schema**: JSON format yang mencakup `score`, `label`, `priority_level`, dan `recommended_action`.
+
+### C. Fitur Cerdas Utama
+1.  **Sentiment Engine**: Pipeline NLP yang memberikan skor kebahagiaan (Emotions Scoring) pada setiap feedback.
+2.  **Insight Extractor**: AI Generative yang merangkum ribuan baris jawaban menjadi poin rekomendasi strategis bagi pimpinan (Executive Summary).
+3.  **BI Chat Interface (Natural Language Query)**: Memungkinkan eksplorasi data menggunakan bahasa alami melalui fitur Tanya AI di dashboard.
+4.  **Smart Anomaly Detection**: Mendeteksi pola jawaban yang tidak wajar atau input "sampah" menggunakan Large Language Model (LLM) reasoning.
+
+---
+
+## � 5. Katalog Modul & Fungsionalitas (Functional Directory)
+
+Sistem dibagi menjadi 6 kelompok strategis yang mencakup 19 modul operasional:
+
+### I. Identitas & Akses (1-UTAMA)
+- **Instansi**: Manajemen workspace dan kuota data untuk masing-masing Dinas/Unit.
+- **Pengguna**: Sistem RBAC (*Role-Based Access Control*) profesional untuk segregasi tugas admin.
+
+### II. Standardisasi (2-DESAIN & TEMPLATE)
+- **Template Master**: Standardisasi kuesioner lintas instansi (Versioning Support).
+- **Tema Visual**: Kontrol branding penuh untuk pengalaman pengguna yang *Seamless*.
+
+### III. Operasional (3-OPERASIONAL SURVEI)
+- **Daftar Survei**: Manajemen *life-cycle* survei (Draft, Active, Paused, Closed).
+- **Struktur Modular**: Mendukung survei multi-halaman dengan logika lompatan (*Branching*).
+
+### IV. Kecerdasan (4-ANALISIS & AI)
+- **Analitik Kualitatif**: Transformasi jawaban teks menjadi data kategori berbasis AI.
+- **Funnel Analysis**: Melacak titik di mana responden berhenti mengisi survei (*Conversion Tracking*).
+
+### V. Integrasi (5-KONEKTIVITAS)
+- **Client Management**: Implementasi OAuth2 untuk pendaftaran aplikasi pihak ketiga.
+- **Webhook Engine**: Mekanisme *Push Notification* data ke sistem luar secara real-time.
+
+### VI. Tata Kelola (6-KEAMANAN & LOG)
+- **Data Retention**: Menjamin ketersediaan ruang penyimpanan melalui otomasi pembersihan data lama.
+- **Consent Tracking**: Rekam jejak legalitas data sesuai UU Perlindungan Data Pribadi.
 
 ---
 
-## 🛠️ 6. Panduan Maintenance & Pengembangan
+## 🔌 6. Integrasi Ekosistem (Developer Experience)
 
-### Perintah Penting (Ops):
-- **Reset & Seed (Demo Power)**:
-  `php artisan migrate:fresh --seed` (Menciptakan 10 Instansi & ratusan data demo).
-- **Update Filament Cache**:
-  `php artisan filament:upgrade`.
-- **Monitor Queue**:
-  `php artisan queue:work` (Pastikan worker berjalan untuk pemrosesan AI & Webhook).
+SurveyCore didesain untuk kemudahan integrasi sistem-ke-sistem:
 
-### Pengembangan Mendatang (Roadmap):
-- Modul GIS (Geographic Information System) untuk memetakan kepuasan per-wilayah.
-- Integrasi biometrik melalui API khusus verifikasi warga.
+1.  **Dapatkan Kredensial**: Melalui menu Konektivitas untuk mendapatkan `ID` & `Secret`.
+2.  **Konsumsi API**:
+    - **GET Schema**: Mengambil struktur survei dalam JSON terstandarisasi.
+    - **POST Submit**: Pengiriman jawaban dengan proteksi Signature Digital (HMAC).
+3.  **Otomasi Output**: Mendukung ekspor data reaktif ke format CSV, Excel, dan PDF secara instan.
 
 ---
-**SurveyCore terus berkembang sebagai standar infrastruktur survei yang andal, aman, dan cerdas.**
+
+## 🛠️ 7. Teknologi Serta Maintenance
+
+### Stack Teknologi:
+- **Backend**: Laravel 12.0 (PHP 8.3+)
+- **Admin Panel**: Filament v3 (TALL Stack)
+- **Security Logic**: HMAC-SHA256 & OAuth2
+- **Database**: MySQL 8.0 Optimized JSON Columns
+- **Worker**: Redis Queue for AI & Webhooks
+
+### Pemeliharaan Berkala:
+- **Scalability**: Mendukung optimasi caching via Redis untuk trafik tinggi.
+- **Integrity**: Jalankan `php artisan db:seed --class=DummyDataSeeder` untuk simulasi beban data masif.
+
+---
+**SurveyCore terus berevolusi untuk memberikan standar keamanan dan intelijen data terbaik bagi organisasi Anda.**
 
 ---
 **Developed with ❤️ by the SurveyCore Engineering Team.**
+
+---
+# SurveiCoreSystem
