@@ -1,7 +1,7 @@
 # 📊 Survey-as-a-Service Core System (SurveyCore)
 ### *The Enterprise-Grade Infrastructure for Intelligent Data Collection & Analysis*
 
-![SurveyCore Enterprise Header](https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2070)
+![SurveyCore Enterprise Header](public/img/readme_snapshot.png)
 
 ---
 

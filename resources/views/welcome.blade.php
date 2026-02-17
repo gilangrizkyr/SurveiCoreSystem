@@ -39,7 +39,7 @@
                 <span class="text-gradient">Berbasis Data Akurat.</span>
             </h1>
             <p class="subtitle fade-in-up delay-200">
-                Platform survei terpusat dengan performa tinggi. 
+                Platform survei terpusat dengan performa tinggi.
                 Skalabilitas tanpa batas, keamanan enterprise, dan integrasi API yang seamless.
             </p>
             <div class="cta-group fade-in-up delay-300">
@@ -56,12 +56,24 @@
         </div>
     </section>
 
+    <!-- Tenant Ecosystem Section -->
+    <section class="ecosystem-section fade-in-up">
+        <div class="container">
+            <p class="ecosystem-label">Terintegrasi dengan Ekosistem Instansi</p>
+            <div class="tenant-slider" id="tenantSlider">
+                <!-- Data loaded via JS -->
+                <div class="loading-spinner"></div>
+            </div>
+        </div>
+    </section>
+
     <!-- Stats Section -->
     <section id="stats" class="section-glass">
         <div class="container">
             <div class="section-header fade-in-up">
                 <h2 class="section-title">Statistik <span class="text-gradient">Real-Time</span></h2>
-                <p class="section-subtitle">Transparansi data publik yang diperbarui secara langsung dari seluruh instansi terdaftar.</p>
+                <p class="section-subtitle">Transparansi data publik yang diperbarui secara langsung dari seluruh
+                    instansi terdaftar.</p>
             </div>
 
             <!-- Stats Cards -->
@@ -112,8 +124,19 @@
                 <!-- Popular Surveys -->
                 <div class="glass-panel fade-in-up delay-100">
                     <h3 class="panel-title">Survei Terpopuler</h3>
-                    <div id="popularSurveys" class="survey-list">
-                        <p class="loading-text">Memuat data...</p>
+                    <div class="table-responsive">
+                        <table class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Survei</th>
+                                    <th>Respons</th>
+                                    <th>Sentimen AI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="popularSurveysTable">
+                                <!-- Data loaded via JS -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -127,7 +150,7 @@
                 <h2 class="section-title">Cara Kerja <span class="text-gradient">Platform</span></h2>
                 <p class="section-subtitle">Alur kerja otomatis untuk efisiensi maksimal.</p>
             </div>
-            
+
             <div class="steps-grid">
                 <div class="step-card glass fade-in-up delay-100">
                     <div class="step-number">01</div>
@@ -159,7 +182,8 @@
             <div class="features-grid">
                 <div class="feature-card glass fade-in-up delay-100">
                     <div class="icon-wrapper">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                         </svg>
                     </div>
@@ -168,8 +192,10 @@
                 </div>
                 <div class="feature-card glass fade-in-up delay-200">
                     <div class="icon-wrapper">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                         </svg>
                     </div>
                     <h3>API-First Core</h3>
@@ -177,7 +203,8 @@
                 </div>
                 <div class="feature-card glass fade-in-up delay-300">
                     <div class="icon-wrapper">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
                             <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                         </svg>
                     </div>
@@ -225,7 +252,8 @@
             <div class="footer-grid">
                 <div class="brand-col">
                     <a href="/" class="logo">SurveyCore<span class="dot">.</span></a>
-                    <p>Platform infrastruktur survei terpusat untuk modernisasi pengumpulan data instansi pemerintah dan swasta.</p>
+                    <p>Platform infrastruktur survei terpusat untuk modernisasi pengumpulan data instansi pemerintah dan
+                        swasta.</p>
                 </div>
                 <div class="links-col">
                     <h4>Platform</h4>
@@ -253,7 +281,7 @@
         const init3D = () => {
             const container = document.getElementById('canvas-container');
             const scene = new THREE.Scene();
-            
+
             // Fog for depth
             scene.fog = new THREE.FogExp2(0x0f172a, 0.002);
 
@@ -276,7 +304,7 @@
             const particlesCount = 70; // Professional amount, not too crowded
             const posArray = new Float32Array(particlesCount * 3);
 
-            for(let i = 0; i < particlesCount * 3; i++) {
+            for (let i = 0; i < particlesCount * 3; i++) {
                 posArray[i] = (Math.random() - 0.5) * 50;
             }
 
@@ -341,26 +369,26 @@
             function updateLines() {
                 const positions = particlesMesh.geometry.attributes.position.array;
                 const linePositions = [];
-                
+
                 // Simple version: Connect points that are close in the static buffer.
-                
+
                 for (let i = 0; i < particlesCount; i++) {
                     for (let j = i + 1; j < particlesCount; j++) {
                         const dist = Math.sqrt(
-                            Math.pow(positions[i*3] - positions[j*3], 2) +
-                            Math.pow(positions[i*3+1] - positions[j*3+1], 2) +
-                            Math.pow(positions[i*3+2] - positions[j*3+2], 2)
+                            Math.pow(positions[i * 3] - positions[j * 3], 2) +
+                            Math.pow(positions[i * 3 + 1] - positions[j * 3 + 1], 2) +
+                            Math.pow(positions[i * 3 + 2] - positions[j * 3 + 2], 2)
                         );
 
                         if (dist < 8) { // Connection threshold
                             linePositions.push(
-                                positions[i*3], positions[i*3+1], positions[i*3+2],
-                                positions[j*3], positions[j*3+1], positions[j*3+2]
+                                positions[i * 3], positions[i * 3 + 1], positions[i * 3 + 2],
+                                positions[j * 3], positions[j * 3 + 1], positions[j * 3 + 2]
                             );
                         }
                     }
                 }
-                
+
                 linesMesh.geometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
             }
 
@@ -381,7 +409,7 @@
         // --------------------------------------------------
         // Stats & Logic
         // --------------------------------------------------
-        
+
         // Fetch Public Stats
         let responseChart = null;
 
@@ -400,6 +428,7 @@
 
                     createResponseChart(data.monthly_responses);
                     showPopularSurveys(data.popular_surveys);
+                    showTenants(data.active_tenants);
                 }
             } catch (error) {
                 console.error('Failed to load stats:', error);
@@ -423,7 +452,7 @@
 
         function createResponseChart(monthlyData) {
             const ctx = document.getElementById('responseChart');
-            if(!ctx) return;
+            if (!ctx) return;
 
             // Destroy existing if needed
             if (responseChart) responseChart.destroy();
@@ -482,23 +511,59 @@
         }
 
         function showPopularSurveys(surveys) {
-            const container = document.getElementById('popularSurveys');
-            if(!container) return;
+            const container = document.getElementById('popularSurveysTable');
+            if (!container) return;
 
             if (!surveys || surveys.length === 0) {
-                container.innerHTML = '<p class="text-secondary text-center py-4">Belum ada survei publik.</p>';
+                container.innerHTML = '<tr><td colspan="3" class="text-center py-4">Belum ada survei publik.</td></tr>';
                 return;
             }
 
-            container.innerHTML = surveys.map((survey, index) => `
-                <div class="survey-item glass-hover-sm">
-                    <div class="survey-info">
-                        <div class="survey-title">${survey.title}</div>
-                        <div class="survey-count">${survey.responses_count} respons</div>
-                    </div>
-                    <div class="survey-rank">#${index + 1}</div>
+            // Sentiment mapping (AI Simulation for feedback)
+            const sentiments = [
+                { label: 'Positif', class: 'positive' },
+                { label: 'Netral', class: 'neutral' },
+                { label: 'Kritis', class: 'negative' }
+            ];
+
+            container.innerHTML = surveys.map((survey, index) => {
+                const s = sentiments[index % 3]; // Mock logic
+                return `
+                <tr>
+                    <td>
+                        <div class="survey-name">${survey.title}</div>
+                        <div class="survey-meta">ID: ${survey.uuid.substring(0, 8)}</div>
+                    </td>
+                    <td>
+                        <div class="count-badge">${survey.responses_count}</div>
+                    </td>
+                    <td>
+                        <span class="sentiment-badge ${s.class}">${s.label}</span>
+                    </td>
+                </tr>
+            `}).join('');
+        }
+
+        function showTenants(tenants) {
+            const container = document.getElementById('tenantSlider');
+            if (!container) return;
+
+            if (!tenants || tenants.length === 0) {
+                container.innerHTML = '<p class="text-secondary">Siap melayani berbagai instansi.</p>';
+                return;
+            }
+
+            container.innerHTML = tenants.map(tenant => `
+                <div class="tenant-item glass-hover-sm">
+                    <div class="tenant-logo-placeholder">${tenant.name.substring(0, 1)}</div>
+                    <span class="tenant-name">${tenant.name}</span>
                 </div>
             `).join('');
+
+            // Duplicate for infinite scroll effect
+            if (tenants.length > 4) {
+                container.innerHTML += container.innerHTML;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', loadStats);
@@ -510,24 +575,24 @@
         const sendBtn = document.getElementById('sendBtn');
         const chatMessages = document.getElementById('chatMessages');
 
-        if(chatBtn) chatBtn.addEventListener('click', () => chatWindow.classList.toggle('active'));
+        if (chatBtn) chatBtn.addEventListener('click', () => chatWindow.classList.toggle('active'));
 
         function addMessage(text, isAi = false) {
-            if(!chatMessages) return;
+            if (!chatMessages) return;
             const msg = document.createElement('div');
             msg.className = `message ${isAi ? 'ai' : 'user'} fade-in`;
-            msg.innerHTML = text; 
+            msg.innerHTML = text;
             chatMessages.appendChild(msg);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }
 
         async function handleChat() {
-            if(!chatInput || !chatInput.value.trim()) return;
+            if (!chatInput || !chatInput.value.trim()) return;
             const text = chatInput.value.trim();
             chatInput.value = '';
-            
+
             addMessage(text, false);
-            
+
             const loadingId = 'loading-' + Date.now();
             const loadingMsg = document.createElement('div');
             loadingMsg.className = 'message ai fade-in';
@@ -551,14 +616,14 @@
             }
         }
 
-        if(sendBtn) sendBtn.addEventListener('click', handleChat);
-        if(chatInput) chatInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') handleChat(); });
-        
+        if (sendBtn) sendBtn.addEventListener('click', handleChat);
+        if (chatInput) chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleChat(); });
+
         // Scroll Animation Observer
         const observerOptions = { threshold: 0.1 };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if(entry.isIntersecting) {
+                if (entry.isIntersecting) {
                     entry.target.classList.add('visible');
                     observer.unobserve(entry.target);
                 }
@@ -568,4 +633,5 @@
         document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
     </script>
 </body>
+
 </html>
