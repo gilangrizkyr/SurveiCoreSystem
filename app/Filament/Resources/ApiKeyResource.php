@@ -15,10 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ApiKeyResource extends Resource
 {
+    use \App\Traits\RestrictsToSuperAdmin;
+
     protected static ?string $model = ApiKey::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-key';
-    protected static ?string $navigationGroup = '5-KONEKTIVITAS';
+    protected static ?string $navigationGroup = 'Integrasi API';
     protected static ?int $navigationSort = 13;
     protected static ?string $navigationLabel = 'Kunci Akses (Keys)';
     protected static ?string $modelLabel = 'API Key';
@@ -52,7 +54,7 @@ class ApiKeyResource extends Resource
                         Forms\Components\DateTimePicker::make('expires_at')
                             ->label('Kadaluarsa Pada')
                             ->native(false),
-                    ])->columns(2),
+                    ])->columns(['md' => 2]),
 
                 Forms\Components\Section::make('Kredensial (Auto-Generated)')
                     ->schema([
@@ -70,7 +72,7 @@ class ApiKeyResource extends Resource
                             ->readOnly()
                             ->required()
                             ->helperText('Hanya bisa dilihat di sini. Simpan baik-baik.'),
-                    ])->columns(2),
+                    ])->columns(['md' => 2]),
 
                 Forms\Components\Section::make('Keamanan & Akses')
                     ->collapsed()

@@ -15,11 +15,13 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ApiUsageLogResource extends Resource
 {
+    use \App\Traits\RestrictsToSuperAdmin;
+
     protected static ?string $model = ApiUsageLog::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static ?string $navigationGroup = '6-KEAMANAN & LOG';
+    protected static ?string $navigationGroup = 'Keamanan & Log';
     protected static ?int $navigationSort = 16;
 
     protected static ?string $navigationLabel = 'Log Penggunaan API';

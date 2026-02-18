@@ -12,6 +12,8 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Three.js -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+    <!-- Marked.js for Markdown rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 
 <body>
@@ -581,7 +583,7 @@
             if (!chatMessages) return;
             const msg = document.createElement('div');
             msg.className = `message ${isAi ? 'ai' : 'user'} fade-in`;
-            msg.innerHTML = text;
+            msg.innerHTML = isAi ? marked.parse(text) : text;
             chatMessages.appendChild(msg);
             chatMessages.scrollTop = chatMessages.scrollHeight;
         }

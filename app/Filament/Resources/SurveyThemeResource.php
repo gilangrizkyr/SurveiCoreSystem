@@ -18,7 +18,7 @@ class SurveyThemeResource extends Resource
     protected static ?string $model = SurveyTheme::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-paint-brush';
-    protected static ?string $navigationGroup = '2-DESAIN & TEMPLATE';
+    protected static ?string $navigationGroup = 'Desain & Template';
     protected static ?int $navigationSort = 4;
     protected static ?string $navigationLabel = 'Tema Visual';
     protected static ?string $modelLabel = 'Tema';
@@ -28,9 +28,6 @@ class SurveyThemeResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('tenant_id')
-                    ->numeric()
-                    ->default(null),
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
@@ -60,9 +57,6 @@ class SurveyThemeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('tenant_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('primary_color')

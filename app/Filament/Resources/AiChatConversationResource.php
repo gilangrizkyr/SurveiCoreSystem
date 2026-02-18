@@ -18,7 +18,7 @@ class AiChatConversationResource extends Resource
     protected static ?string $model = AiChatConversation::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-ellipsis';
-    protected static ?string $navigationGroup = '4-ANALISIS & AI';
+    protected static ?string $navigationGroup = 'Analisis AI';
     protected static ?int $navigationSort = 10;
     protected static ?string $navigationLabel = 'Tanya AI (Chat)';
     protected static ?string $modelLabel = 'Chat AI';
@@ -28,26 +28,26 @@ class AiChatConversationResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('tenant_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('user_id')
-                    ->numeric()
-                    ->default(null),
-                Forms\Components\TextInput::make('session_id')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\Textarea::make('message')
-                    ->required()
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('response')
-                    ->required()
-                    ->columnSpanFull(),
-                Forms\Components\Textarea::make('context')
-                    ->columnSpanFull(),
-                Forms\Components\TextInput::make('intent')
-                    ->maxLength(255)
-                    ->default(null),
+                Forms\Components\Section::make('Diskusi dengan BumbuAI')
+                    ->description('AI ini telah dilatih untuk bersikap profesional (Informative & Interactive) dan menjaga kerahasiaan data pribadi responden.')
+                    ->schema([
+                        Forms\Components\TextInput::make('session_id')
+                            ->label('ID Sesi Chat')
+                            ->required()
+                            ->disabled()
+                            ->dehydrated(),
+                        Forms\Components\Textarea::make('message')
+                            ->label('Pertanyaan / Perintah')
+                            ->required()
+                            ->columnSpanFull(),
+                        Forms\Components\Textarea::make('response')
+                            ->label('Jawaban BumbuAI')
+                            ->required()
+                            ->columnSpanFull(),
+                        Forms\Components\Placeholder::make('security_note')
+                            ->label('Peringatan Keamanan')
+                            ->content('BumbuAI dilarang keras membocorkan Nama, Email, atau HP responden ke publik.')
+                    ])->columns(['md' => 2]),
             ]);
     }
 

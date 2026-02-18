@@ -19,7 +19,7 @@ class SurveyResource extends Resource
     protected static ?string $model = Survey::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $navigationGroup = '3-OPERASIONAL SURVEI';
+    protected static ?string $navigationGroup = 'Manajemen Survei';
     protected static ?int $navigationSort = 5;
     protected static ?string $navigationLabel = 'Daftar Survei';
     protected static ?string $modelLabel = 'Survei';
@@ -48,15 +48,18 @@ class SurveyResource extends Resource
                             Forms\Components\Grid::make(['default' => 2])
                                 ->schema([
                                     Forms\Components\Select::make('type')
-                                        ->label('Jenis Survei')
+                                        ->label('Channel Akses')
+                                        ->helperText('Pilih bagaimana survei ini akan diakses')
+                                        ->helperText('Pilih bagaimana survei ini akan diakses. Publik (Web+API), Private (Internal), atau API Only.')
                                         ->options([
-                                            'standard' => 'Standar (Kuesioner Umum)',
-                                            'poll' => 'Poling (Satu Pertanyaan)',
-                                            'quiz' => 'Kuis (Berskoring)',
+                                            'public' => '🌐 Publik (Web + API)',
+                                            'private' => '🔒 Private (Internal Only)',
+                                            'embedded' => '📦 Embedded (iFrame)',
+                                            'api_only' => '🔌 API Only (Backend Only)',
                                         ])
                                         ->required()
                                         ->native(false)
-                                        ->default('standard'),
+                                        ->default('public'),
 
                                     Forms\Components\Select::make('status')
                                         ->label('Status Publikasi')
@@ -74,22 +77,43 @@ class SurveyResource extends Resource
 
                             Forms\Components\Grid::make(['default' => 2])
                                 ->schema([
-                                    Forms\Components\Select::make('tenant_id')
-                                        ->label('Instansi Pemilik')
-                                        ->relationship('tenant', 'name')
-                                        ->searchable()
-                                        ->preload()
-                                        ->required()
-                                        ->helperText('Pilih instansi yang menyelenggarakan survei ini.'),
+                                     Forms\Components\Select::make('creator_id')
+                                         ->label('Penanggung Jawab')
+                                         ->relationship('creator', 'name')
+                                         ->searchable()
+                                         ->default(auth()->id())
+                                         ->disabled()
+                                         ->dehydrated(),
+                                 ]),
 
-                                    Forms\Components\Select::make('creator_id')
-                                        ->label('Penanggung Jawab')
-                                        ->relationship('creator', 'name')
-                                        ->searchable()
-                                        ->default(auth()->id())
-                                        ->disabled()
-                                        ->dehydrated(),
-                                ]),
+                            Forms\Components\Section::make('Link Survei Publik')
+                                ->description('Bagikan link ini kepada masyarakat untuk mengisi survei.')
+                                ->schema([
+                                    Forms\Components\Placeholder::make('public_link_display')
+                                        ->label('Link Survei')
+                                        ->content(function ($record) {
+                                            if (!$record) {
+                                                return 'Link akan tersedia setelah survei dibuat';
+                                            }
+                                            $url = route('public.survey.show', ['uuid' => $record->uuid]);
+                                            return new \Illuminate\Support\HtmlString(
+                                                '<div class="flex items-center gap-2">
+                                                    <code class="text-sm bg-gray-100 dark:bg-gray-800 px-3 py-2 rounded flex-1">' . e($url) . '</code>
+                                                    <button type="button" 
+                                                        onclick="navigator.clipboard.writeText(\'' . e($url) . '\').then(() => { 
+                                                            new FilamentNotification().title(\'Link berhasil disalin!\').success().send(); 
+                                                        })"
+                                                        class="fi-btn fi-btn-size-md fi-color-gray fi-btn-color-gray">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                                        </svg>
+                                                    </button>
+                                                </div>'
+                                            );
+                                        }),
+                                ])
+                                ->visible(fn ($record) => $record !== null)
+                                ->collapsible(),
 
                             Forms\Components\Section::make('Konteks Penggunaan (Aplikasi)')
                                 ->description('Informasi aplikasi luar yang menggunakan survei ini.')
@@ -153,6 +177,31 @@ class SurveyResource extends Resource
                                         ->helperText('Kosongkan jika survei berlaku selamanya.'),
                                 ]),
 
+                            Forms\Components\Section::make('Kontrol Responden & Duplikasi')
+                                ->schema([
+                                    Forms\Components\Toggle::make('require_respondent_identity')
+                                        ->label('Wajib Isi Data Diri?')
+                                        ->helperText('Jika aktif, responden wajib mengisi Nama & Email sebelum mulai.')
+                                        ->default(false),
+                                        
+                                    Forms\Components\Toggle::make('allow_multiple_submissions')
+                                        ->label('Izinkan Mengisi Berkali-kali?')
+                                        ->helperText('Jika mati, satu orang hanya bisa mengisi satu kali.')
+                                        ->default(true)
+                                        ->reactive(),
+                                        
+                                    Forms\Components\Select::make('duplicate_prevention_method')
+                                        ->label('Metode Pencegahan Duplikat')
+                                        ->options([
+                                            'cookie' => 'Browser Cookie (Simple)',
+                                            'email' => 'Berdasarkan Email (Strict)',
+                                            'login' => 'Wajib Login (Internal)',
+                                        ])
+                                        ->default('cookie')
+                                        ->visible(fn (Forms\Get $get) => !$get('allow_multiple_submissions'))
+                                        ->required(fn (Forms\Get $get) => !$get('allow_multiple_submissions')),
+                                ])->columns(['md' => 2]),
+
                             Forms\Components\Section::make('Opsi Tambahan (Opsional)')
                                 ->description('Bagian ini tidak wajib diisi. Digunakan untuk keperluan teknis.')
                                 ->collapsed()
@@ -184,10 +233,6 @@ class SurveyResource extends Resource
                     ->label('Judul')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('tenant.name')
-                    ->label('Instansi')
-                    ->sortable()
-                    ->searchable(),
                 Tables\Columns\TextColumn::make('source_app_name')
                     ->label('Aplikasi Sumber')
                     ->description(fn (Survey $record): ?string => $record->source_app_url)
@@ -195,15 +240,15 @@ class SurveyResource extends Resource
                 Tables\Columns\TextColumn::make('status')
                     ->label('Status')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
                         'draft' => 'Draf',
                         'active' => 'Aktif',
                         'paused' => 'Berhenti',
                         'closed' => 'Tutup',
                         'archived' => 'Arsip',
-                        default => $state,
+                        default => $state ?? 'Draft',
                     })
-                    ->color(fn (string $state) => match ($state) {
+                    ->color(fn (?string $state): string => match ($state) {
                         'draft' => 'gray',
                         'active' => 'success',
                         'paused' => 'warning',
@@ -212,7 +257,22 @@ class SurveyResource extends Resource
                         default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('type')
-                    ->label('Tipe'),
+                    ->label('Channel')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'public' => '🌐 Publik',
+                        'api_only' => '🔌 API Only',
+                        'embedded' => '📦 Embedded',
+                        'private' => '🔒 Private',
+                        default => ucfirst($state ?? 'public'),
+                    })
+                    ->color(fn (?string $state): string => match ($state) {
+                        'public' => 'success',
+                        'api_only' => 'info',
+                        'embedded' => 'warning',
+                        'private' => 'danger',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('starts_at')
                     ->label('Mulai')
                     ->dateTime()
@@ -228,9 +288,51 @@ class SurveyResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                
+                Tables\Actions\Action::make('preview')
+                    ->label('Preview Survei')
+                    ->icon('heroicon-m-eye')
+                    ->color('success')
+                    ->url(fn (Survey $record): string => route('public.survey.show', ['uuid' => $record->uuid]))
+                    ->openUrlInNewTab()
+                    ->tooltip('Lihat tampilan survei yang dilihat masyarakat'),
+                
+                Tables\Actions\Action::make('copy_link')
+                    ->label('Salin Link')
+                    ->icon('heroicon-m-clipboard-document')
+                    ->color('gray')
+                    ->requiresConfirmation(false)
+                    ->action(function (Survey $record) {
+                        $url = route('public.survey.show', ['uuid' => $record->uuid]);
+                        
+                        // Send notification with the URL
+                        \Filament\Notifications\Notification::make()
+                            ->title('Link Survei')
+                            ->body($url)
+                            ->success()
+                            ->persistent()
+                            ->actions([
+                                \Filament\Notifications\Actions\Action::make('close')
+                                    ->label('Tutup')
+                                    ->close(),
+                            ])
+                            ->send();
+                    })
+                    ->modalHeading('Salin Link Survei')
+                    ->modalDescription('Gunakan link ini untuk dibagikan ke responden.')
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('Tutup'),
+                
+                Tables\Actions\Action::make('export_csv')
+                    ->label('Export CSV')
+                    ->icon('heroicon-m-arrow-down-tray')
+                    ->color('success')
+                    ->url(fn (Survey $record): string => route('admin.surveys.export_csv', $record->uuid))
+                    ->openUrlInNewTab(),
+
                 Tables\Actions\Action::make('integration')
                     ->label('Integrasi API')
-                    ->icon('heroicon-m-code-bracket')
+                    ->icon('heroicon-o-cpu-chip')
                     ->color('info')
                     ->modalHeading('Panduan Integrasi API')
                     ->modalSubmitAction(false)
@@ -246,10 +348,12 @@ class SurveyResource extends Resource
             ]);
     }
 
+
     public static function getRelations(): array
     {
         return [
             RelationManagers\SectionsRelationManager::class,
+            RelationManagers\ResponsesRelationManager::class,
         ];
     }
 

@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'api.hmac' => \App\Http\Middleware\VerifyHmacSignature::class,
             'api.rate_limit' => \App\Http\Middleware\ApiRateLimit::class,
             'api.ip_whitelist' => \App\Http\Middleware\IpWhitelist::class,
+            'api.key' => \App\Http\Middleware\AuthenticateApiKey::class,
             'security.headers' => \App\Http\Middleware\SecurityHeaders::class,
         ]);
 

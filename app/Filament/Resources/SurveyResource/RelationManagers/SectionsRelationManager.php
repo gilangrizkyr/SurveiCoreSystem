@@ -49,16 +49,22 @@ class SectionsRelationManager extends RelationManager
                         Forms\Components\Select::make('type')
                         ->label('Tipe Jawaban')
                         ->options([
-                            'text' => 'Teks Pendek',
-                            'textarea' => 'Teks Panjang',
+                            'short_text' => 'Teks Pendek',
+                            'long_text' => 'Teks Panjang',
                             'number' => 'Angka',
-                            'select' => 'Pilihan Dropdown',
-                            'checkbox' => 'Pilihan Ganda (Kotak Centang)',
-                            'radio' => 'Pilihan Tunggal (Radio)',
+                            'dropdown' => 'Pilihan Dropdown',
+                            'checkboxes' => 'Pilihan Ganda (Kotak Centang)',
+                            'multiple_choice' => 'Pilihan Tunggal (Radio)',
                             'email' => 'Alamat Email',
                             'date' => 'Tanggal',
                             'nps' => 'Skor NPS (0-10)',
-                            'rating' => 'Penilaian Bintang',
+                            'star_rating' => 'Penilaian Bintang',
+                            'rating' => 'Skala Linear',
+                            'file_upload' => 'Upload File',
+                            'time' => 'Waktu',
+                            'datetime' => 'Tanggal & Waktu',
+                            'phone' => 'Nomor Telepon',
+                            'url' => 'URL/Link',
                         ])
                         ->required()
                         ->reactive()
@@ -85,7 +91,7 @@ class SectionsRelationManager extends RelationManager
                         ->placeholder('Contoh: sangat_puas')
                         ->required(),
                     ])
-                    ->visible(fn($get) => in_array($get('type'), ['select', 'checkbox', 'radio']))
+                    ->visible(fn($get) => in_array($get('type'), ['dropdown', 'checkboxes', 'multiple_choice']))
                     ->columns(2),
                 ])
                 ->columnSpanFull()

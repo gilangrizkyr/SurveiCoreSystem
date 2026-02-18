@@ -15,10 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class WebhookResource extends Resource
 {
+    use \App\Traits\RestrictsToSuperAdmin;
+
     protected static ?string $model = Webhook::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rss';
-    protected static ?string $navigationGroup = '5-KONEKTIVITAS';
+    protected static ?string $navigationGroup = 'Integrasi API';
     protected static ?int $navigationSort = 14;
     protected static ?string $navigationLabel = 'Webhook (Otomasi)';
 
@@ -57,7 +59,7 @@ class WebhookResource extends Resource
                 Forms\Components\Toggle::make('is_active')
                 ->label('Aktifkan Webhook')
                 ->default(true),
-            ])->columns(2),
+            ])->columns(['md' => 2]),
         ]);
     }
 

@@ -18,7 +18,7 @@ class AiInsightResource extends Resource
     protected static ?string $model = AiInsight::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-light-bulb';
-    protected static ?string $navigationGroup = '4-ANALISIS & AI';
+    protected static ?string $navigationGroup = 'Analisis AI';
     protected static ?int $navigationSort = 8;
     protected static ?string $navigationLabel = 'Insight AI';
     protected static ?string $modelLabel = 'Insight';

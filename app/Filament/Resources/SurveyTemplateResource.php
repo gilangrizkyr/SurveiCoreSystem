@@ -18,7 +18,7 @@ class SurveyTemplateResource extends Resource
     protected static ?string $model = SurveyTemplate::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
-    protected static ?string $navigationGroup = '2-DESAIN & TEMPLATE';
+    protected static ?string $navigationGroup = 'Desain & Template';
     protected static ?int $navigationSort = 3;
     protected static ?string $navigationLabel = 'Template Survei';
     protected static ?string $modelLabel = 'Template';

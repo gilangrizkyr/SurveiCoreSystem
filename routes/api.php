@@ -73,4 +73,20 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
                 );
             }
             );
-        });
+
+            // ============================================================
+            // SURVEY API - For External Integration (API Key Required)
+            // ============================================================
+            Route::prefix('survey-api')
+                ->name('api.survey.')
+                ->middleware('api.key')
+                ->group(function () {
+            Route::get('/{uuid}/structure', [\App\Http\Controllers\Api\V1\SurveyApiController::class , 'getStructure'])
+                ->name('structure');
+            Route::post('/{uuid}/submit', [\App\Http\Controllers\Api\V1\SurveyApiController::class , 'submitResponse'])
+                ->name('submit');
+            Route::get('/{uuid}/stats', [\App\Http\Controllers\Api\V1\SurveyApiController::class , 'getStats'])
+                ->name('stats');
+        }
+        );
+    });

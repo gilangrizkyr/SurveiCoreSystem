@@ -50,65 +50,40 @@ class PublicStatsController extends Controller
     }
 
     /**
-     * Get chatbot response with real data
+     * Get chatbot response with real data and AI intelligence
      */
-    public function chatbot(Request $request): JsonResponse
+    public function chatbot(Request $request, \App\Services\AiChatService $aiService): JsonResponse
     {
-        $message = strtolower(trim($request->input('message', '')));
-        $response = '';
+        $message = $request->input('message', '');
 
-        // Berapa survei
-        if (str_contains($message, 'berapa') && (str_contains($message, 'survei') || str_contains($message, 'survey'))) {
-            $count = Survey::where('type', 'public')->where('status', 'active')->count();
-            $response = "Saat ini ada **{$count} survei publik aktif** di platform kami yang bisa Anda ikuti!";
-        }
-        // Total respons
-        elseif (str_contains($message, 'respons') || str_contains($message, 'response')) {
-            $count = SurveyResponse::count();
-            $response = "Platform kami telah mengumpulkan **{$count} respons** dari berbagai survei!";
-        }
-        // Organisasi
-        elseif (str_contains($message, 'organisasi') || str_contains($message, 'instansi')) {
-            $count = Tenant::where('status', 'active')->count();
-            $response = "Kami melayani **{$count} organisasi/instansi** yang menggunakan platform survei kami.";
-        }
-        // Survei populer
-        elseif (str_contains($message, 'populer') || str_contains($message, 'terpopuler')) {
-            $surveys = Survey::where('type', 'public')
-                ->where('status', 'active')
-                ->withCount('responses')
-                ->orderBy('responses_count', 'desc')
-                ->take(3)
-                ->get(['title', 'responses_count']);
+        // 1. Ambil data real-time untuk konteks AI
+        $statsContext = [
+            'total_surveys' => Survey::where('status', 'active')->count(),
+            'total_responses' => SurveyResponse::count(),
+            'total_organizations' => Tenant::where('status', 'active')->count(),
+            'popular_surveys' => Survey::where('type', 'public')
+            ->where('status', 'active')
+            ->withCount('responses')
+            ->orderBy('responses_count', 'desc')
+            ->take(3)
+            ->pluck('title')
+            ->toArray()
+        ];
 
-            if ($surveys->count() > 0) {
-                $list = $surveys->map(fn($s) => "• {$s->title} ({$s->responses_count} respons)")->join("\n");
-                $response = "**Survei paling populer:**\n{$list}";
-            }
-            else {
-                $response = "Belum ada survei publik yang tersedia saat ini.";
-            }
-        }
-        // Cara ikut survei
-        elseif (str_contains($message, 'ikut') || str_contains($message, 'partisipasi')) {
-            $response = "Untuk mengikuti survei:\n1. Klik menu **'Survei Publik'**\n2. Pilih survei yang ingin Anda ikuti\n3. Isi pertanyaan dengan jujur\n4. Kirim respons Anda\n\nSemua data Anda terjaga kerahasiaannya! 🔒";
-        }
-        // API
-        elseif (str_contains($message, 'api')) {
-            $response = "Platform kami menyediakan **RESTful API v1** lengkap dengan:\n• JWT Authentication\n• API Key Management\n• HMAC Request Signing\n• Rate Limiting\n\nKunjungi **/api/v1** untuk dokumentasi lengkap!";
-        }
-        // Keamanan
-        elseif (str_contains($message, 'aman') || str_contains($message, 'security') || str_contains($message, 'keamanan')) {
-            $response = "Keamanan data Anda adalah prioritas kami! 🔐\n\n• Enkripsi end-to-end\n• OWASP Top 10 compliant\n• Multi-factor authentication\n• IP whitelisting\n• Audit logging lengkap";
-        }
-        // Default
-        else {
-            $response = "Halo! Saya bisa membantu Anda dengan:\n• Informasi jumlah survei aktif\n• Statistik platform\n• Cara ikut survei\n• Informasi API\n• Keamanan data\n\nSilakan tanya apa saja! 😊";
-        }
+        // 2. Bungkus pesan dengan konteks data agar AI tahu statistik terbaru
+        $contextualMessage = "DATA PLATFORM SAAT INI:\n";
+        $contextualMessage .= "- Total Survei Aktif: {$statsContext['total_surveys']}\n";
+        $contextualMessage .= "- Total Jawaban Masuk: {$statsContext['total_responses']}\n";
+        $contextualMessage .= "- Total Instansi: {$statsContext['total_organizations']}\n";
+        $contextualMessage .= "- Survei Populer: " . implode(', ', $statsContext['popular_surveys']) . "\n\n";
+        $contextualMessage .= "PERTANYAAN USER: " . $message;
+
+        // 3. Dapatkan jawaban dari AI Service (Gemini atau Fallback Smart Simulator)
+        $aiResponse = $aiService->getResponse($contextualMessage);
 
         return response()->json([
             'success' => true,
-            'message' => $response,
+            'message' => $aiResponse,
         ]);
     }
 

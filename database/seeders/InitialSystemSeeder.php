@@ -29,8 +29,8 @@ class InitialSystemSeeder extends Seeder
         $tenantAdminRole = Role::firstOrCreate(
         ['slug' => 'tenant_admin'],
         [
-            'name' => 'Tenant Admin',
-            'description' => 'Manage tenant surveys',
+            'name' => 'Operator Survei',
+            'description' => 'Manage surveys and analytics only',
         ]
         );
 

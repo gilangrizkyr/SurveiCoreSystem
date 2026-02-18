@@ -15,14 +15,21 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TenantResource extends Resource
 {
+    use \App\Traits\RestrictsToSuperAdmin;
+
     protected static ?string $model = Tenant::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office-2';
-    protected static ?string $navigationGroup = '1. Konfigurasi Instansi';
+    protected static ?string $navigationGroup = 'Pengaturan Admin';
     protected static ?int $navigationSort = 1;
     protected static ?string $navigationLabel = 'Manajemen Instansi';
     protected static ?string $modelLabel = 'Instansi';
     protected static ?string $pluralModelLabel = 'Daftar Instansi';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 
     public static function form(Form $form): Form
     {

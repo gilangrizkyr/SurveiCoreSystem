@@ -18,7 +18,7 @@ class SurveyStatisticResource extends Resource
     protected static ?string $model = SurveyStatistic::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
-    protected static ?string $navigationGroup = '4-ANALISIS & AI';
+    protected static ?string $navigationGroup = 'Analisis AI';
     protected static ?int $navigationSort = 7;
     protected static ?string $navigationLabel = 'Statistik Data';
     protected static ?string $modelLabel = 'Statistik';

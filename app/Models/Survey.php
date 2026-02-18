@@ -30,6 +30,9 @@ class Survey extends Model
         'metadata',
         'starts_at',
         'ends_at',
+        'allow_multiple_submissions',
+        'require_respondent_identity',
+        'duplicate_prevention_method',
     ];
 
     protected $casts = [
@@ -37,6 +40,8 @@ class Survey extends Model
         'metadata' => 'json',
         'starts_at' => 'datetime',
         'ends_at' => 'datetime',
+        'allow_multiple_submissions' => 'boolean',
+        'require_respondent_identity' => 'boolean',
     ];
 
     public function tenant()

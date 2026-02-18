@@ -15,6 +15,10 @@ class SurveyResponse extends Model
         'survey_id',
         'respondent_id',
         'link_id',
+        'respondent_name',
+        'respondent_email',
+        'respondent_phone',
+        'respondent_nik',
         'status',
         'started_at',
         'submitted_at',
@@ -26,12 +30,16 @@ class SurveyResponse extends Model
         'quality_score',
         'is_flagged',
         'flag_reason',
+        'metadata',
+        'session_token',
+        'fingerprint',
     ];
 
     protected $casts = [
         'started_at' => 'datetime',
         'submitted_at' => 'datetime',
         'geo_location' => 'json',
+        'metadata' => 'json',
         'is_flagged' => 'boolean',
     ];
 

@@ -15,10 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ApiClientResource extends Resource
 {
+    use \App\Traits\RestrictsToSuperAdmin;
+
     protected static ?string $model = ApiClient::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-computer-desktop';
-    protected static ?string $navigationGroup = '5-KONEKTIVITAS';
+    protected static ?string $navigationGroup = 'Integrasi API';
     protected static ?int $navigationSort = 12;
     protected static ?string $navigationLabel = 'Aplikasi Luar (Client)';
     protected static ?string $modelLabel = 'Client API';
@@ -32,13 +34,6 @@ class ApiClientResource extends Resource
                     ->schema([
                         Forms\Components\Hidden::make('uuid')
                             ->default((string) \Illuminate\Support\Str::uuid()),
-                        
-                        Forms\Components\Select::make('tenant_id')
-                            ->relationship('tenant', 'name')
-                            ->label('Instansi Pemilik')
-                            ->searchable()
-                            ->preload()
-                            ->required(),
 
                         Forms\Components\TextInput::make('name')
                             ->label('Nama Aplikasi / Klien')

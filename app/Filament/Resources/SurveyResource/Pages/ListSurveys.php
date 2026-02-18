@@ -16,4 +16,11 @@ class ListSurveys extends ListRecords
             Actions\CreateAction::make(),
         ];
     }
+
+    protected function getHeaderWidgets(): array
+    {
+        return [
+            SurveyResource\Widgets\SurveyStatsOverview::class ,
+        ];
+    }
 }

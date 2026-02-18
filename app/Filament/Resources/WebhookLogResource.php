@@ -15,10 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class WebhookLogResource extends Resource
 {
+    use \App\Traits\RestrictsToSuperAdmin;
+
     protected static ?string $model = WebhookLog::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-command-line';
-    protected static ?string $navigationGroup = '6-KEAMANAN & LOG';
+    protected static ?string $navigationGroup = 'Keamanan & Log';
     protected static ?int $navigationSort = 17;
     protected static ?string $navigationLabel = 'Log Webhook (Out)';
     protected static ?string $modelLabel = 'Log Webhook';

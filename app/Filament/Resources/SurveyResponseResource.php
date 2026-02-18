@@ -20,7 +20,7 @@ class SurveyResponseResource extends Resource
     protected static ?string $model = SurveyResponse::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
-    protected static ?string $navigationGroup = '3-OPERASIONAL SURVEI';
+    protected static ?string $navigationGroup = 'Manajemen Survei';
     protected static ?int $navigationSort = 6;
     protected static ?string $navigationLabel = 'Hasil Jawaban';
     protected static ?string $modelLabel = 'Respon';

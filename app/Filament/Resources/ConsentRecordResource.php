@@ -15,10 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ConsentRecordResource extends Resource
 {
+    use \App\Traits\RestrictsToSuperAdmin;
+
     protected static ?string $model = ConsentRecord::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-finger-print';
-    protected static ?string $navigationGroup = '6-KEAMANAN & LOG';
+    protected static ?string $navigationGroup = 'Keamanan & Log';
     protected static ?int $navigationSort = 18;
     protected static ?string $navigationLabel = 'Persetujuan (Consent)';
     protected static ?string $modelLabel = 'Consent';

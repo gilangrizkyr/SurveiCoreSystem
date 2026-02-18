@@ -15,10 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DataRetentionPolicyResource extends Resource
 {
+    use \App\Traits\RestrictsToSuperAdmin;
+
     protected static ?string $model = DataRetentionPolicy::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-archive-box-arrow-down';
-    protected static ?string $navigationGroup = '6-KEAMANAN & LOG';
+    protected static ?string $navigationGroup = 'Keamanan & Log';
     protected static ?int $navigationSort = 19;
     protected static ?string $navigationLabel = 'Kebijakan Data (Retention)';
     protected static ?string $modelLabel = 'Retention Policy';

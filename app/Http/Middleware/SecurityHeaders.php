@@ -26,11 +26,12 @@ class SecurityHeaders
         // Content Security Policy
         $csp = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://cdn.tailwindcss.com blob:",
+            "worker-src 'self' blob:",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net",
             "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net",
-            "img-src 'self' data: https:",
-            "connect-src 'self' https://cdn.jsdelivr.net",
+            "img-src 'self' data: https: blob:",
+            "connect-src 'self' https://cdn.jsdelivr.net blob: http://localhost http://127.0.0.1:8001",
             "frame-ancestors 'self'",
         ];
 

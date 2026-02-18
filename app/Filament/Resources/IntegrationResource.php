@@ -15,10 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class IntegrationResource extends Resource
 {
+    use \App\Traits\RestrictsToSuperAdmin;
+
     protected static ?string $model = Integration::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-puzzle-piece';
-    protected static ?string $navigationGroup = '5-KONEKTIVITAS';
+    protected static ?string $navigationGroup = 'Integrasi API';
     protected static ?int $navigationSort = 11;
     protected static ?string $navigationLabel = 'Layanan Integrasi';
     protected static ?string $modelLabel = 'Integrasi';
@@ -28,9 +30,6 @@ class IntegrationResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('tenant_id')
-                    ->required()
-                    ->numeric(),
                 Forms\Components\TextInput::make('type')
                     ->required(),
                 Forms\Components\Textarea::make('credentials')
@@ -46,9 +45,6 @@ class IntegrationResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('tenant_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('type'),
                 Tables\Columns\IconColumn::make('is_active')
                     ->boolean(),

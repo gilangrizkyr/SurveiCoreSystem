@@ -15,10 +15,12 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class UserResource extends Resource
 {
+    use \App\Traits\RestrictsToSuperAdmin;
+
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
-    protected static ?string $navigationGroup = '1. Konfigurasi Instansi';
+    protected static ?string $navigationGroup = 'Pengaturan Admin';
     protected static ?int $navigationSort = 2;
     protected static ?string $navigationLabel = 'Manajemen Pengguna';
     protected static ?string $modelLabel = 'Pengguna';
